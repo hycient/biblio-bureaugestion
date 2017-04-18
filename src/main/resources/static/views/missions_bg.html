@@ -1,0 +1,219 @@
+<div class="row" style="margin-left: 5px; margin-right: 5px">
+    <!--liens de navigation-->
+    <div>
+        <ul class="nav nav-pills text-uppercase text-bold" style="font-size: 16px">
+            <li ng-class="{active : (0 === indexMenu)}" class="clickable" ng-click="changeMenu(0)">
+                <a>
+                    <i class="fa fa-table"></i>
+                    MISSIONS ENREGISTRÉES
+                </a>
+            </li>
+            <li ng-class="{active : (1 === indexMenu)}" class="clickable" ng-click="changeMenu(1)">
+                <a>
+                    <i class="fa fa-save"></i>
+                    ENREGISTREMENT
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div ng-show="0 === indexMenu" style="margin-top: 30px">
+        <!--Sélection des colonnes à afficher-->
+        <div class="row">
+            <div class="col-lg-3" ng-repeat="column in columns">
+                <div class="checkbox">
+                    <label>
+                        <input class="uniform" type="checkbox" ng-model="column.show" value="{{column.show}}">
+                        &nbsp;<span style="font-weight: bolder; font-size: 15px">{{column.label}}</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        <!--Gestion de la pagination-->
+        <hr>
+        <div class="row">
+            <div class="col-lg-3">
+                <select class="form-control" ng-model="domaineSelectionne"
+                        ng-change="filterBy(allMissions, missionsByDomaine, testEqualDomaine, domaineSelectionne)"
+                        ng-options="domaineCourant for domaineCourant in domainesExistants">
+                    <option value="">
+                        -- Trier par domaine --
+                    </option>
+                </select>
+            </div>
+            <div class="col-lg-2 has-feedback">
+                <input type="text" class="form-control" placeholder="Recherche..." ng-model="searchText" ng-change="searchManage()">
+            </div>
+        </div>
+
+        <div class="row">
+            <label class="col-lg-3">Sélectionner le nombre de missions</label>
+            <div class="col-lg-2">
+                <select ng-model="nbOfItemsToDisplay" title="Choisir le nombre de missions à afficher par page"
+                        class="form-control"
+                        ng-options="nb for nb in nbItemsArray"
+                        ng-change="changeNbOfItemsToDisplay()">
+                </select>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-2 col-lg-offset-10">
+                <ul class="pagination" style="margin-bottom: 3px">
+                    <li ng-class="{disabled : (currentPage === 1 || currentMissionsArray.length === 0)}"
+                        class="clickable"
+                        title="Cliquez pour aller à la première page">
+                        <a ng-click="selectPageIndex(1)">&#60;&#60;</a>
+                    </li>
+                    <li ng-class="{disabled : (currentPage === 1 || currentMissionsArray.length === 0)}"
+                        class="clickable"
+                        title="Cliquez pour aller à la page précédente">
+                        <a ng-click="decPageIndex()">&#60;</a>
+                    </li>
+                    <li ng-class="{disabled : (currentPage === nbPages || currentMissionsArray.length === 0 || currentPage === nbPages)}"
+                        class="clickable"
+                        title="Cliquez pour aller à la page suivante">
+                        <a ng-click="incPageIndex()">&#62;</a>
+                    </li>
+                    <li ng-class="{disabled : (currentPage === nbPages || currentMissionsArray.length === 0 || currentPage === nbPages)}"
+                        class="clickable"
+                        title="Cliquez pour aller à la dernière page">
+                        <a ng-click="selectPageIndex(nbPages)">&#62;&#62;</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover table-bordered table-condensed text-center">
+                <thead class="text-bold bg-black-gradient">
+                    <tr>
+                        <th>#</th>
+                        <th ng-repeat="column in columns" ng-show="column.show">
+                            {{column.label}}
+                        </th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="mission in missionsByPage track by mission.id" class="text-black">
+                        <td>{{(currentPage - 1) * nbOfItemsToDisplay + $index + 1}}</td>
+                        <td ng-repeat="column in columns" ng-show="column.show">{{mission[column.name]}}</td>
+                        <td>
+                            <button class="btn btn-info btn-sm" title="cliquez pour modifier les champs de cette mission"
+                                    ng-click="updateMission(mission, (currentPage - 1) * nbOfItemsToDisplay + $index + 1)">
+                                <i class="fa fa-edit"></i>
+                            </button>
+                            &nbsp;
+                            <button class="btn btn-danger btn-sm" title="cliquez pour supprimer cette mission"
+                                    ng-click="deleteMission((currentPage - 1) * nbOfItemsToDisplay + $index + 1, mission.id)">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-lg-2">
+            <md-button class="md-warn md-raised" ng-click="showConfirmDelete($event)" flex="100" flex-gt-md="auto"
+                       ng-show="allMissions.length !== 0">
+                <i class="fa fa-trash"></i>
+                Tout Supprimer
+            </md-button>
+        </div>
+    </div>
+
+    <div ng-show="1 === indexMenu" style="margin-top: 30px">
+        <!--Gestion des alertes-->
+        <div class="alert alert-success" ng-show="showPanlSuccess">
+            <button type="button" class="close" data-dismiss="alert" ng-click="hidePanlSuccess()">&times;</button>
+            <strong>{{successMessage}}</strong>
+        </div>
+
+        <div class="alert alert-warning" ng-show="showPanlWarning">
+            <button type="button" class="close" data-dismiss="alert" ng-click="hidePanlWarning()()">&times;</button>
+            <strong>{{warningMessage}}</strong>
+        </div>
+
+        <div class="alert alert-danger" ng-show="showPanlError">
+            <button type="button" class="close" data-dismiss="alert" ng-click="hidePanlError()">&times;</button>
+            <strong>{{errorMessage}}</strong>
+        </div>
+        <form class="form-horizontal" ng-submit="saveMission()">
+            <div class="form-group">
+                <label class="control-label col-lg-4">Objet<span style="color: red"> *</span></label>
+                <div class="col-lg-6">
+                    <input type="text" class="form-control" ng-model="missionToSave.objet" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-lg-4">Emplacement<span style="color: red"> *</span></label>
+                <div class="col-lg-6">
+                    <input type="text" class="form-control" ng-model="missionToSave.emplacement" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-lg-4">Année</label>
+                <div class="col-lg-6">
+                    <input type="number" class="form-control" ng-model="missionToSave.annee">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-lg-4">Nature</label>
+                <div class="col-lg-6">
+                    <input type="text" class="form-control" ng-model="missionToSave.nature">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-lg-4">Organisation(s) Sollicitatrice(s)</label>
+                <div class="col-lg-6">
+                    <textarea class="form-control" ng-model="organisationsSollicitatricesAreaContent" rows="5">
+
+                    </textarea>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-lg-4">Document(s)</label>
+                <div class="col-lg-6">
+                    <textarea class="form-control" ng-model="documentsAreaContent" rows="5">
+
+                    </textarea>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-lg-4">Domaine<span style="color: red"> *</span></label>
+                <div class="col-lg-3">
+                    <input type="text" class="form-control" ng-model="missionToSave.domaine" required>
+                </div>
+                <div class="col-lg-3">
+                    <select class="form-control" ng-model="missionToSave.domaine"
+                            ng-options="domaineCourant for domaineCourant in domainesExistants">
+                        <option value="">
+                            -- Choisir un domaine --
+                        </option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-lg-offset-6 col-lg-2">
+                    <button class="btn btn-primary col-lg-12" type="submit">
+                        <i class="fa fa-save"></i>
+                        Enregistrer
+                    </button>
+                </div>
+                <div class="col-lg-2">
+                    <button class="btn btn-danger col-lg-12" type="reset">
+                        <i class="fa fa-undo"></i>
+                        Réinitialiser
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

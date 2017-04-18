@@ -1,0 +1,281 @@
+<div class="row" style="margin-left: 5px; margin-right: 5px">
+    <!--liens de navigation-->
+    <div>
+        <ul class="nav nav-pills text-uppercase text-bold" style="font-size: 16px">
+            <li ng-class="{active : (0 === indexMenu)}" class="clickable" ng-click="changeMenu(0)">
+                <a>
+                    <i class="fa fa-table"></i>
+                    OUVRAGES ENREGISTRÉS
+                </a>
+            </li>
+            <li ng-class="{active : (1 === indexMenu)}" class="clickable" ng-click="changeMenu(1)">
+                <a>
+                    <i class="fa fa-save"></i>
+                    ENREGISTREMENT
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div ng-show="0 === indexMenu" style="margin-top: 30px">
+        <!--Sélection des colonnes à afficher-->
+        <div class="row">
+            <div class="col-lg-3" ng-repeat="column in columns">
+                <div class="checkbox">
+                    <label>
+                        <input class="uniform" type="checkbox" ng-model="column.show" value="{{column.show}}">
+                        &nbsp;<span style="font-weight: bolder; font-size: 15px">{{column.label}}</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        <!--Gestion de la pagination-->
+        <hr>
+        <div class="row">
+            <div class="col-lg-3">
+                <select class="form-control" ng-model="domaineSelectionne"
+                        ng-change="filterBy(allOuvrages, ouvragesByDomaine, testEqualDomaine, domaineSelectionne);getMatieres(domaineSelectionne)"
+                        ng-options="domaineCourant for domaineCourant in domainesExistants">
+                    <option value="">
+                        -- Trier par domaine --
+                    </option>
+                </select>
+            </div>
+            <div class="col-lg-3">
+                <select class="form-control" ng-model="matiereSelectionnee"
+                        ng-change="filterBy(ouvragesByDomaine, ouvragesByMatiere, testEqualMatiere, matiereSelectionnee); getSpecialites(matiereSelectionnee)"
+                        ng-options="matiereCourante for matiereCourante in matieresExistantes">
+                    <option value="">
+                        -- Trier par matière --
+                    </option>
+                </select>
+            </div>
+            <div class="col-lg-3">
+                <select class="form-control" ng-model="specialiteSelectionnee"
+                        ng-change="filterBy(ouvragesByMatiere, ouvragesBySpecialite, testEqualSpecialite, specialiteSelectionnee)"
+                        ng-options="specialiteCourante for specialiteCourante in specialitesExistantes">
+                    <option value="">
+                        -- Trier par spécialité --
+                    </option>
+                </select>
+            </div>
+            <div class="col-lg-2 has-feedback">
+                <input type="text" class="form-control" placeholder="Recherche..." ng-model="searchText" ng-change="searchManage()">
+            </div>
+        </div>
+
+        <div class="row">
+            <label class="col-lg-3">Sélectionner le nombre d'ouvrages</label>
+            <div class="col-lg-2">
+                <select ng-model="nbOfItemsToDisplay" title="Choisir le nombre d'ouvrages à afficher par page"
+                        class="form-control"
+                        ng-options="nb for nb in nbItemsArray"
+                        ng-change="changeNbOfItemsToDisplay()">
+                </select>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-2 col-lg-offset-10">
+                <ul class="pagination" style="margin-bottom: 3px">
+                    <li ng-class="{disabled : (currentPage === 1 || currentOuvragesArray.length === 0)}"
+                        class="clickable"
+                        title="Cliquez pour aller à la première page">
+                        <a ng-click="selectPageIndex(1)">&#60;&#60;</a>
+                    </li>
+                    <li ng-class="{disabled : (currentPage === 1 || currentOuvragesArray.length === 0)}"
+                        class="clickable"
+                        title="Cliquez pour aller à la page précédente">
+                        <a ng-click="decPageIndex()">&#60;</a>
+                    </li>
+                    <li ng-class="{disabled : (currentPage === nbPages || currentOuvragesArray.length === 0 || currentPage === nbPages)}"
+                        class="clickable"
+                        title="Cliquez pour aller à la page suivante">
+                        <a ng-click="incPageIndex()">&#62;</a>
+                    </li>
+                    <li ng-class="{disabled : (currentPage === nbPages || currentOuvragesArray.length === 0 || currentPage === nbPages)}"
+                        class="clickable"
+                        title="Cliquez pour aller à la dernière page">
+                        <a ng-click="selectPageIndex(nbPages)">&#62;&#62;</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover table-bordered table-condensed text-center">
+                <thead class="text-bold bg-black-gradient">
+                    <tr>
+                        <th>#</th>
+                        <th ng-repeat="column in columns" ng-show="column.show">
+                            {{column.label}}
+                        </th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="ouvrage in ouvragesByPage track by ouvrage.id" class="text-black">
+                        <td>{{(currentPage - 1) * nbOfItemsToDisplay + $index + 1}}</td>
+                        <td ng-repeat="column in columns" ng-show="column.show">{{ouvrage[column.name]}}</td>
+                        <td>
+                            <button class="btn btn-info btn-sm" title="cliquez pour modifier les champs de cet ouvrage"
+                                    ng-click="updateOuvrage(ouvrage, (currentPage - 1) * nbOfItemsToDisplay + $index + 1)">
+                                <i class="fa fa-edit"></i>
+                            </button>
+                            &nbsp;
+                            <button class="btn btn-danger btn-sm" title="cliquez pour supprimer cet ouvrage"
+                                    ng-click="deleteOuvrage((currentPage - 1) * nbOfItemsToDisplay + $index + 1, ouvrage.id)">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-lg-2">
+            <md-button class="md-warn md-raised" ng-click="showConfirmDelete($event)" flex="100" flex-gt-md="auto"
+                       ng-show="allOuvrages.length !== 0">
+                <i class="fa fa-trash"></i>
+                Tout Supprimer
+            </md-button>
+        </div>
+    </div>
+
+    <div ng-show="1 === indexMenu" style="margin-top: 30px">
+        <!--Gestion des alertes-->
+        <div class="alert alert-success" ng-show="showPanlSuccess">
+            <button type="button" class="close" data-dismiss="alert" ng-click="hidePanlSuccess()">&times;</button>
+            <strong>{{successMessage}}</strong>
+        </div>
+
+        <div class="alert alert-warning" ng-show="showPanlWarning">
+            <button type="button" class="close" data-dismiss="alert" ng-click="hidePanlWarning()()">&times;</button>
+            <strong>{{warningMessage}}</strong>
+        </div>
+
+        <div class="alert alert-danger" ng-show="showPanlError">
+            <button type="button" class="close" data-dismiss="alert" ng-click="hidePanlError()">&times;</button>
+            <strong>{{errorMessage}}</strong>
+        </div>
+        <form class="form-horizontal" ng-submit="saveOuvrage()">
+            <div class="form-group">
+                <label class="control-label col-lg-4">Titre<span style="color: red"> *</span></label>
+                <div class="col-lg-6">
+                    <input type="text" class="form-control" ng-model="ouvrageToSave.titre" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-lg-4">Emplacement<span style="color: red"> *</span></label>
+                <div class="col-lg-6">
+                    <input type="text" class="form-control" ng-model="ouvrageToSave.emplacement" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-lg-4">Année</label>
+                <div class="col-lg-6">
+                    <input type="number" class="form-control" ng-model="ouvrageToSave.annee">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-lg-4">Revue / Collection</label>
+                <div class="col-lg-6">
+                    <input type="text" class="form-control" ng-model="ouvrageToSave.revueCollection">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-lg-4">N° Série</label>
+                <div class="col-lg-6">
+                    <input type="text" class="form-control" ng-model="ouvrageToSave.numSerie">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-lg-4">Édition</label>
+                <div class="col-lg-6">
+                    <input type="text" class="form-control" ng-model="ouvrageToSave.edition">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-lg-4">Auteur(s)</label>
+                <div class="col-lg-6">
+                    <textarea class="form-control" ng-model="auteursAreaContent" rows="5">
+
+                    </textarea>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-lg-4">État(s) / Organisation(s)</label>
+                <div class="col-lg-6">
+                    <textarea class="form-control" ng-model="etatsOrganisationsAreaContent" rows="5">
+
+                    </textarea>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-lg-4">Domaine<span style="color: red"> *</span></label>
+                <div class="col-lg-3">
+                    <input type="text" class="form-control" ng-model="ouvrageToSave.domaine" required>
+                </div>
+                <div class="col-lg-3">
+                    <select class="form-control" ng-model="ouvrageToSave.domaine" ng-change="getMatieres(ouvrageToSave.domaine)"
+                            ng-options="domaineCourant for domaineCourant in domainesExistants">
+                        <option value="">
+                            -- Choisir un domaine --
+                        </option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-lg-4">Matière</label>
+                <div class="col-lg-3">
+                    <input type="text" class="form-control" ng-model="ouvrageToSave.matiere">
+                </div>
+                <div class="col-lg-3">
+                    <select class="form-control" ng-model="ouvrageToSave.matiere" ng-change="getSpecialites(ouvrageToSave.matiere)"
+                            ng-options="matiereCourante for matiereCourante in matieresExistantes">
+                        <option value="">
+                            -- Choisir une matière --
+                        </option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-lg-4">Spécialité</label>
+                <div class="col-lg-3">
+                    <input type="text" class="form-control" ng-model="ouvrageToSave.specialite">
+                </div>
+                <div class="col-lg-3">
+                    <select class="form-control" ng-model="ouvrageToSave.specialite"
+                            ng-options="specialiteCourante for specialiteCourante in specialitesExistantes">
+                        <option value="">
+                            -- Choisir une spécialité --
+                        </option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-lg-offset-6 col-lg-2">
+                    <button class="btn btn-primary col-lg-12" type="submit">
+                        <i class="fa fa-save"></i>
+                        Enregistrer
+                    </button>
+                </div>
+                <div class="col-lg-2">
+                    <button class="btn btn-danger col-lg-12" type="reset">
+                        <i class="fa fa-undo"></i>
+                        Réinitialiser
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

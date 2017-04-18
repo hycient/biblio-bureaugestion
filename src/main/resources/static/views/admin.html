@@ -1,0 +1,213 @@
+<div>
+    <!--Affichage des ouvrages enregistrés-->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="box">
+                <header>
+                    <div class="icons"><i class="fa fa-table"></i></div>
+                    <h5>UTILISATEURS ENREGISTRÉS</h5>
+                    <!-- .toolbar -->
+                    <div class="toolbar">
+                        <nav style="padding: 8px;">
+                            <a class="btn btn-default btn-xs collapse-box"
+                               ng-show="showUsersList" ng-click="showUsersListFunc(false)">
+                                <i class="fa fa-minus"></i>
+                            </a>
+                            <a class="btn btn-default btn-xs collapse-box"
+                               ng-show="!showUsersList" ng-click="showUsersListFunc(true)">
+                                <i class="fa fa-plus"></i>
+                            </a>
+                        </nav>
+                    </div>
+                    <!-- /.toolbar -->
+                </header>
+                <div class="body" ng-show="showUsersList">
+                    <table id="ouvrageTable" class="table table-bordered table-condensed table-hover table-striped text-center">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Titre</th>
+                                <th>Prénom</th>
+                                <th>Nom</th>
+                                <th>Surnom</th>
+                                <th>Sexe</th>
+                                <th>Activé(e)</th>
+                                <th>Adresse Email</th>
+                                <th>Mot de pass</th>
+                                <th>Rôle(s)</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="user in users">
+                                <td>{{$index + 1}}</td>
+                                <td>{{user.title}}</td>
+                                <td>{{user.firstName}}</td>
+                                <td>{{user.lastName}}</td>
+                                <td>{{user.nickName}}</td>
+                                <td>{{user.gender ? "Homme" : "Femme"}}</td>
+                                <td>
+                                    <input type="checkbox" ng-model="user.activated" disabled="true">
+                                </td>
+                                <td>{{user.username}}</td>
+                                <td>{{user.password}}</td>
+                                <td>{{rolesToString(user.roles)}}</td>
+                                <td>
+                                    <button class="btn btn-danger" ng-click="deleteUser(user.username, $index)">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--Enregistrement de nouveaux ouvrages-->
+    <!-- /.row -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="box">
+                <header>
+                    <div class="icons"><i class="fa fa-save"></i></div>
+                    <h5>ENREGISTREMENT DES UTILISATEURS</h5>
+                    <!-- .toolbar -->
+                    <div class="toolbar">
+                        <nav style="padding: 8px;">
+                            <a class="btn btn-default btn-xs collapse-box"
+                               ng-show="showUserSave" ng-click="showUserSaveFunc(false)">
+                                <i class="fa fa-minus"></i>
+                            </a>
+                            <a class="btn btn-default btn-xs collapse-box"
+                               ng-show="!showUserSave" ng-click="showUserSaveFunc(true)">
+                                <i class="fa fa-plus"></i>
+                            </a>
+                        </nav>
+                    </div>
+                    <!-- /.toolbar -->
+                </header>
+                <div id="collapseOne" class="body" ng-show="showUserSave">
+                    <!--Gestion des alertes-->
+                    <div class="alert alert-success" ng-show="showPanlSuccess">
+                        <button type="button" class="close" data-dismiss="alert" ng-click="hidePanlSuccess()">&times;</button>
+                        <strong>{{successMessage}}</strong>
+                    </div>
+
+                    <div class="alert alert-warning" ng-show="showPanlWarning">
+                        <button type="button" class="close" data-dismiss="alert" ng-click="hidePanlWarning()()">&times;</button>
+                        <strong>{{warningMessage}}</strong>
+                    </div>
+
+                    <div class="alert alert-danger" ng-show="showPanlError">
+                        <button type="button" class="close" data-dismiss="alert" ng-click="hidePanlError()">&times;</button>
+                        <strong>{{errorMessage}}</strong>
+                    </div>
+                    <!--Formulaire d'importation de nouvelles données-->
+                    <form class="form-horizontal" ng-submit="saveUser()">
+                        <div class="form-group">
+                            <label class="control-label col-lg-4">Titre<span class="text-danger"> *</span></label>
+                            <div class="col-lg-6">
+                                <select class="form-control" ng-model="userToSave.title"
+                                        ng-options="titreCourant for titreCourant in availabeTitles" required>
+                                    <option value="">
+                                        -- Choisir le titre --
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-lg-4">Prénom<span class="text-danger"> *</span></label>
+                            <div class="col-lg-6">
+                                <input type="text" class="form-control" ng-model="userToSave.firstName" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-lg-4">Nom<span class="text-danger"> *</span></label>
+                            <div class="col-lg-6">
+                                <input type="text" class="form-control" ng-model="userToSave.lastName" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-lg-4">Adresse Email<span class="text-danger"> *</span></label>
+                            <div class="col-lg-6">
+                                <input type="email" class="form-control" ng-model="userToSave.username" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-lg-4">Mot De pass<span class="text-danger"> *</span></label>
+                            <div class="col-lg-6">
+                                <input type="password" class="form-control" ng-model="firstPassword" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-lg-4">Mot De pass De Nouveau<span class="text-danger"> *</span></label>
+                            <div class="col-lg-6">
+                                <input type="password" class="form-control" ng-model="secondPassword" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-lg-4">Surnom<span class="text-danger"> *</span></label>
+                            <div class="col-lg-6">
+                                <input type="text" class="form-control" ng-model="userToSave.nickName" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-lg-4">Rôles<span class="text-danger"> *</span></label>
+                            <div class="col-lg-6">
+                                <select class="form-control" ng-model="userToSave.roles"
+                                        ng-options="role.role for role in roles" multiple="true" required>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-lg-4">Activé(e)<span class="text-danger"> *</span></label>
+                            <div class="col-lg-1">
+                                <div class="checkbox">
+                                    <label>
+                                        <input class="uniform" type="checkbox" ng-model="userToSave.activated">
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="checkbox col-lg-3">
+                                <label ng-repeat="sexCourant in genders">
+                                    <input class="uniform" type="radio" ng-model="selectedGender" value="{{sexCourant}}" name="genderRadio">
+                                    <span style="font-weight: bolder; font-size: 15px">{{sexCourant}}</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <!--<label class="control-label col-lg-4">Sexe<span class="text-danger"> *</span></label>-->
+                            <div class="col-lg-offset-4 col-lg-6">
+
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-lg-offset-6 col-lg-2">
+                                <button class="btn btn-primary col-lg-12" type="submit">
+                                    <i class="fa fa-save"></i>
+                                    Enregistrer
+                                </button>
+                            </div>
+                            <div class="col-lg-2">
+                                <button class="btn btn-danger col-lg-12" type="button" ng-click="resetSaveForm()">
+                                    <i class="fa fa-undo"></i>
+                                    Réinitialiser
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /.row -->
+</div>

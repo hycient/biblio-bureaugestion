@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="utf-8"/>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+        <title>Connexion</title>
+        <!-- Tell the browser to be responsive to screen width -->
+        <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+        <!-- Bootstrap 3.3.6 -->
+        <link rel="stylesheet" th:href="@{lib/bootstrap/css/bootstrap.min.css}"/>
+        <!-- Font Awesome -->
+        <link rel="stylesheet" th:href="@{https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css}"/>
+        <!-- Ionicons -->
+        <link rel="stylesheet" th:href="@{https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css}"/>
+        <!-- Theme style -->
+        <link rel="stylesheet" th:href="@{lib/dist/css/AdminLTE.min.css}"/>
+        <!-- iCheck -->
+        <link rel="stylesheet" th:href="@{lib/plugins/iCheck/square/blue.css}"/>
+
+        <!--Application icon-->
+        <link rel="icon" th:href="@{favicon.jpg}" />
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+        <![endif]-->
+    </head>
+    <body class="hold-transition login-page" ng-app="biblioBGApp" ng-controller="LoginController">
+        <div class="login-box">
+            <div class="login-logo">
+                <a><b>Biblio BG</b></a>
+            </div>
+            <!-- /.login-logo -->
+            <div class="login-box-body">
+                <p class="login-box-msg" style="font-weight: bolder; font-size: 30px">Connectez - vous !</p>
+
+                <div class="alert alert-danger text-center h4" th:if="${param.error}">
+                    <strong>Adresse et/ou mot de pass incorrect(s)</strong>
+                </div>
+
+                <div class="alert alert-success text-center h4" th:if="${param.logout}">
+                    <strong>Vous êtes déconnecté(e) !</strong>
+                </div>
+
+                <form th:action="@{/login}" method="post">
+                    <div class="form-group has-feedback">
+                        <input name="username" type="email" class="form-control" placeholder="Votre adresse email"/>
+                        <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
+                    </div>
+                    <div class="form-group has-feedback">
+                        <input name="password" type="password" class="form-control" placeholder="Votre mot de pass"/>
+                        <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+                    </div>
+                    <hr/>
+                    <div class="form-group">
+                        <!-- /.col -->
+                        <div>
+                            <button type="submit" class="btn btn-primary btn-block" style="font-weight: bolder; font-size: 20px">
+                                Connexion
+                            </button>
+                        </div>
+                        <!-- /.col -->
+                    </div>
+                </form>
+            </div>
+            <!-- /.login-box-body -->
+        </div>
+        <!-- /.login-box -->
+    </body>
+</html>
